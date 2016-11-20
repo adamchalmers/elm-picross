@@ -1,6 +1,7 @@
 module Grid exposing (..)
 
 import Array as A
+import Maybe exposing (andThen)
 
 type alias Grid a = A.Array (A.Array a)
 
@@ -18,3 +19,15 @@ indexedMap f grid =
 
 toLists : Grid a -> List (List a)
 toLists g = A.toList <| A.map (A.toList) g
+
+get : Int -> Int -> Grid a -> Maybe a
+get i j grid = (A.get j grid) |> andThen (A.get i)
+
+set : Int -> Int -> a -> Grid a -> Grid a
+set j i val grid =
+    let
+        row = A.get i grid
+    in
+        case row of
+            Just r -> (A.set i (A.set j val r) grid)
+            Nothing -> grid
