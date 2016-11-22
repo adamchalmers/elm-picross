@@ -13,7 +13,11 @@ main =
 
 easy : Model
 easy =
-    Model easyPic (A.initialize 5 (always (A.initialize 5 (always False)))) "console"
+    let
+        console = "console"
+        -- console = toString <| Rules.flattenBools [False]
+    in
+        Model easyPic (A.initialize 5 (always (A.initialize 5 (always False)))) console
 
 easyPic : Grid.Grid Bool
 easyPic =
@@ -25,17 +29,20 @@ easyPic =
         , A.fromList [False, False, False, False, True]
         ]
 
-
-
--- UPDATE
-
 update : Msg -> Model -> Model
 update msg model =
     case msg of
         Noop ->
             model
         Click x y ->
-            { model
-            | console = "clicked square [" ++ toString x ++ ", " ++ toString y ++ "]"
-            , progress = (Grid.set x y (not <| Maybe.withDefault True <| Grid.get x y model.progress) model.progress)
-            }
+            let
+                newProgress = Grid.set x y (not <| Maybe.withDefault True <| Grid.get x y model.progress) model.progress
+            in
+                { model
+                | console = "clicked square [" ++ toString x ++ ", " ++ toString y ++ "]"
+                , progress = newProgress
+                , console =
+                    if newProgress == model.puzzle
+                    then "Win"
+                    else model.console
+                }

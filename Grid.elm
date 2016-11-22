@@ -31,3 +31,28 @@ set j i val grid =
         case row of
             Just r -> (A.set i (A.set j val r) grid)
             Nothing -> grid
+
+transpose : Grid a -> Maybe (Grid a)
+transpose grid =
+    let
+        r = List.range 0 (-1 + A.length grid)
+    in
+        Maybe.map A.fromList (unmaybeList <| List.map (\i -> row i grid) r)
+
+row : Int -> Grid a -> Maybe (A.Array a)
+row i grid = unmaybeArray <| A.map (A.get i) grid
+
+unmaybeList : List (Maybe a) -> Maybe (List a)
+unmaybeList elems =
+    case elems of
+        [] ->
+            Just []
+        (e::es) ->
+            case (e, unmaybeList es) of
+                (_, Nothing) -> Nothing
+                (Nothing, _) -> Nothing
+                (Just x, Just xs) -> Just (x::xs)
+
+unmaybeArray : A.Array (Maybe a) -> Maybe (A.Array a)
+unmaybeArray arr =
+    Maybe.map A.fromList (unmaybeList <| (A.toList arr))

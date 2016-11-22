@@ -1,28 +1,48 @@
 module Gui exposing (view)
 
-import Html exposing (Html, Attribute, beginnerProgram, text, div, input, span)
+import Html exposing (Html, Attribute, beginnerProgram, text, div, input, span, table, tr, td)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
 import Array as A
 
 import Core exposing (..)
-import Grid
+import Grid as G
+import Rules
 
 view : Model -> Html Msg
 view model =
-    div [style <| boardStyle <| A.length model.puzzle]
-        <| List.concat
-            [ (drawBoard model.progress)
-            , [text model.console]
+    let
+        boardTable = table [] trs
+        (rows, cols) = Rules.gridHeaders model.puzzle
+        trs = List.map2 (\divRow nums -> tr [] (tds (toString nums) divRow)) (G.toLists <| divGrid model.progress) rows
+        tds header row = [td [] [text header], td [] row]
+    in
+        div []
+            [ boardTable
+            , div [] [text model.console]
+            , text <| toString <| Rules.gridHeaders model.puzzle
             ]
+
+numberedDivGrid : G.Grid Bool -> G.Grid Bool -> List (Html Msg)
+numberedDivGrid puzzle progress =
+    let
+        base = divGrid progress
+        (cols, rows) = Rules.gridHeaders puzzle
+        numToDiv nums = div [] [(text <| toString nums)]
+        annotate row nums = div [style rowStyle] ((numToDiv nums)::row)
+    in
+        List.map2 annotate (G.toLists base) cols
 
 tileSize : Int
 tileSize = 40
 
-drawBoard : Grid.Grid Bool -> List (Html Msg)
-drawBoard grid =
-    Grid.indexedMap (\x y bool -> div [onClick (Click y x), style <| cellStyle bool] [ ]) grid
-    |> Grid.toLists
+divGrid : G.Grid Bool -> G.Grid (Html Msg)
+divGrid = G.indexedMap (\x y bool -> div [onClick (Click y x), style <| cellStyle bool] [ ])
+
+cellDivGrid : G.Grid Bool -> List (Html Msg)
+cellDivGrid grid =
+    divGrid grid
+    |> G.toLists
     |> List.map (div [style rowStyle])
 
 type alias Style = List (String, String)
