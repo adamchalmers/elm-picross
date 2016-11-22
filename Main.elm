@@ -1,11 +1,9 @@
 import Html exposing (Html, Attribute, beginnerProgram, text, div, input, span)
-import Array as A
-import Array
 import Maybe
 
 import Core exposing (..)
 import Gui exposing (view)
-import Grid
+import Grid as G
 
 main : Program Never Model Msg
 main =
@@ -13,20 +11,17 @@ main =
 
 easy : Model
 easy =
-    let
-        console = "console"
-        -- console = toString <| Rules.flattenBools [False]
-    in
-        Model easyPic (A.initialize 5 (always (A.initialize 5 (always False)))) console
+    Model easyPic (G.initialize (G.length easyPic) (G.height easyPic) False) "console"
 
-easyPic : Grid.Grid Bool
+easyPic : G.Grid Bool
 easyPic =
-    A.fromList
-        [ A.fromList [False, False, False, False, False]
-        , A.fromList [False, False, False, False, False]
-        , A.fromList [False, False, False, False, True]
-        , A.fromList [False, False, False, False, True]
-        , A.fromList [False, False, False, False, True]
+    G.fromLists
+        [ [False, False, False, True, True, True]
+        , [False, False, False, False, False, True]
+        , [False, False, False, False, True, True]
+        , [False, False, False, False, True, True]
+        , [True, False, False, False, True, True]
+        , [True, False, False, False, True, True]
         ]
 
 update : Msg -> Model -> Model
@@ -36,11 +31,10 @@ update msg model =
             model
         Click x y ->
             let
-                newProgress = Grid.set x y (not <| Maybe.withDefault True <| Grid.get x y model.progress) model.progress
+                newProgress = G.set x y (not <| Maybe.withDefault True <| G.get x y model.progress) model.progress
             in
                 { model
-                | console = "clicked square [" ++ toString x ++ ", " ++ toString y ++ "]"
-                , progress = newProgress
+                | progress = newProgress
                 , console =
                     if newProgress == model.puzzle
                     then "Win"

@@ -26,14 +26,15 @@ countBools accum prev bools =
         (False, (True::bs)) ->
             countBools (1::accum) True bs
 
-gridHeaders : G.Grid Bool -> (List Int, List Int)
--- Calls flattenBools on all columns and all rows.
-gridHeaders g =
+gridHeaders : G.Grid Bool -> (List String, List String)
+-- Returns column/row headers for a Picross grid.
+gridHeaders grid =
     let
-        transpose = case G.transpose g of
+        transpose = case G.transpose grid of
             Nothing -> Debug.crash "Couldn't transpose grid"
             Just t -> t
-        cols = List.concat <| List.map flattenBools (G.toLists g)
-        rows = List.concat <| List.map flattenBools (G.toLists transpose)
+        fmt g = G.toLists g |> List.map (toString << flattenBools)
+        cols = fmt grid
+        rows = fmt transpose
     in
         (cols, rows)

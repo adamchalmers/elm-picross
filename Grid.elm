@@ -1,9 +1,22 @@
-module Grid exposing (..)
+module Grid exposing (Grid, initialize, map, indexedMap, fromLists, toLists, get, set, transpose, length, height)
 
 import Array as A
+import List
 import Maybe exposing (andThen)
 
 type alias Grid a = A.Array (A.Array a)
+
+length : Grid a -> Int
+length = A.length
+
+height : Grid a -> Int
+height g =
+    case A.get 0 g of
+        Nothing -> Debug.crash "Grid doesn't have a second dimension."
+        Just array -> A.length array
+
+initialize : Int -> Int -> a -> Grid a
+initialize x y val = (A.initialize x (always (A.initialize y (always val))))
 
 map : (a -> b) -> Grid a -> Grid b
 map f grid =
@@ -16,6 +29,9 @@ indexedMap f grid =
         rowFn i row = A.indexedMap (\j elem -> f i j elem) row
     in
         A.indexedMap rowFn grid
+
+fromLists : List (List a) -> Grid a
+fromLists ls = A.fromList <| List.map A.fromList ls
 
 toLists : Grid a -> List (List a)
 toLists g = A.toList <| A.map (A.toList) g
@@ -35,7 +51,7 @@ set j i val grid =
 transpose : Grid a -> Maybe (Grid a)
 transpose grid =
     let
-        r = List.range 0 (-1 + A.length grid)
+        r = List.range 0 (-1 + length grid)
     in
         Maybe.map A.fromList (unmaybeList <| List.map (\i -> row i grid) r)
 

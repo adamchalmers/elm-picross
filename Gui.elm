@@ -1,7 +1,7 @@
 module Gui exposing (view)
 
-import Html exposing (Html, Attribute, beginnerProgram, text, div, input, span, table, tr, td, th)
-import Html.Attributes exposing (..)
+import Html exposing (Html, Attribute, beginnerProgram, p, text, div, input, span, table, tr, td, th)
+import Html.Attributes exposing (style)
 import Html.Events exposing (onClick)
 
 import Core exposing (..)
@@ -11,18 +11,27 @@ import Rules
 view : Model -> Html Msg
 view model =
     let
-        boardTable = table [] (firstRow::trs)
+        boardTable = -- the table contains trs
+            table [] (firstRow::trs)
         firstRow = tr []
             [ th [] []
-            , th [] <| List.map (\num -> div [style numStyle] [text num]) (List.map toString cols)
+            , th [] <| List.map (\num -> div [style numStyle] [text num]) cols
             ]
         (rows, cols) = Rules.gridHeaders model.puzzle
-        trs = List.map2 (\divRow nums -> tr [] (tds (toString nums) divRow)) (G.toLists <| divGrid model.progress) rows
-        tds header row = [td [] [text header], td [] row]
+        trs = -- The trs contain tds
+            List.map2
+                (\divRow nums -> tr [] (tds (nums) divRow))
+                (G.toLists <| divGrid model.progress)
+                rows
+        tds header row = -- The tds contain numbers, then divs.
+            [ td [] [text header]
+            , td [] row
+            ]
     in
         div []
             [ boardTable
             , div [] [text model.console]
+            -- , p [] [text "Cols: ", text <| String.join " " cols]
             ]
 
 numberedDivGrid : G.Grid Bool -> G.Grid Bool -> List (Html Msg)
@@ -30,7 +39,7 @@ numberedDivGrid puzzle progress =
     let
         base = divGrid progress
         (cols, rows) = Rules.gridHeaders puzzle
-        numToDiv nums = div [] [(text <| toString nums)]
+        numToDiv nums = div [] [(text nums)]
         annotate row nums = div [style rowStyle] ((numToDiv nums)::row)
     in
         List.map2 annotate (G.toLists base) cols
