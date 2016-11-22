@@ -2,7 +2,6 @@ module Rules exposing (..)
 -- Rules of Picross, game logic.
 
 import Grid as G
-import Array as A
 import Maybe as M
 
 flattenBools : List Bool -> List Int

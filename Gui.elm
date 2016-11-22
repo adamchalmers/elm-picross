@@ -1,9 +1,8 @@
 module Gui exposing (view)
 
-import Html exposing (Html, Attribute, beginnerProgram, text, div, input, span, table, tr, td)
+import Html exposing (Html, Attribute, beginnerProgram, text, div, input, span, table, tr, td, th)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
-import Array as A
 
 import Core exposing (..)
 import Grid as G
@@ -12,7 +11,11 @@ import Rules
 view : Model -> Html Msg
 view model =
     let
-        boardTable = table [] trs
+        boardTable = table [] (firstRow::trs)
+        firstRow = tr []
+            [ th [] []
+            , th [] <| List.map (\num -> div [style numStyle] [text num]) (List.map toString cols)
+            ]
         (rows, cols) = Rules.gridHeaders model.puzzle
         trs = List.map2 (\divRow nums -> tr [] (tds (toString nums) divRow)) (G.toLists <| divGrid model.progress) rows
         tds header row = [td [] [text header], td [] row]
@@ -20,7 +23,6 @@ view model =
         div []
             [ boardTable
             , div [] [text model.console]
-            , text <| toString <| Rules.gridHeaders model.puzzle
             ]
 
 numberedDivGrid : G.Grid Bool -> G.Grid Bool -> List (Html Msg)
@@ -65,6 +67,20 @@ cellStyle b =
     , ("display", "block")
     , ("float", "left")
     , ("margin", "0.5px")
+    ]
+
+numStyle : Style
+numStyle =
+    [ ("background-color", "white")
+    , ("width", px tileSize)
+    , ("display", "block")
+    , ("float", "left")
+    , ("margin", "0.5px")
+    ]
+
+numCell : Style
+numCell =
+    [
     ]
 
 px : Int -> String
