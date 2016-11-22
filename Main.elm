@@ -1,9 +1,11 @@
 import Html exposing (Html, Attribute, beginnerProgram, text, div, input, span)
 import Maybe
+import Debug
 
 import Core exposing (..)
 import Gui exposing (view)
 import Grid as G
+import Rules
 
 main : Program Never Model Msg
 main =
@@ -11,17 +13,15 @@ main =
 
 easy : Model
 easy =
-    Model easyPic (G.initialize (G.length easyPic) (G.height easyPic) False) "console"
+    Model easyPic (G.initialize (G.length easyPic) (G.height easyPic) White) ""
 
 easyPic : G.Grid Bool
 easyPic =
     G.fromLists
-        [ [False, False, False, True, True, True]
-        , [False, False, False, False, False, True]
-        , [False, False, False, False, True, True]
-        , [False, False, False, False, True, True]
-        , [True, False, False, False, True, True]
-        , [True, False, False, False, True, True]
+        [ [False, False, True, True]
+        , [False, True, False, False]
+        , [False, False, True, True]
+        , [False, True, True, True]
         ]
 
 update : Msg -> Model -> Model
@@ -31,12 +31,21 @@ update msg model =
             model
         Click x y ->
             let
-                newProgress = G.set x y (not <| Maybe.withDefault True <| G.get x y model.progress) model.progress
+                mark = case G.get x y model.progress of
+                    Just m -> m
+                    Nothing -> Debug.crash <| "You've clicked an invalid square " ++ (toString x) ++ " " ++ (toString y)
+                newProgress = G.set x y (changeMark mark) model.progress
             in
                 { model
                 | progress = newProgress
                 , console =
-                    if newProgress == model.puzzle
-                    then "Win"
-                    else model.console
+                    if (Rules.done model.puzzle newProgress)
+                    then "You win!"
+                    else ""
                 }
+
+changeMark : Mark -> Mark
+changeMark m = case m of
+    White -> Black
+    Black -> Dot
+    Dot -> White

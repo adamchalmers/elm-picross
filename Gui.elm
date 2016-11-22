@@ -34,49 +34,28 @@ view model =
             -- , p [] [text "Cols: ", text <| String.join " " cols]
             ]
 
-numberedDivGrid : G.Grid Bool -> G.Grid Bool -> List (Html Msg)
-numberedDivGrid puzzle progress =
-    let
-        base = divGrid progress
-        (cols, rows) = Rules.gridHeaders puzzle
-        numToDiv nums = div [] [(text nums)]
-        annotate row nums = div [style rowStyle] ((numToDiv nums)::row)
-    in
-        List.map2 annotate (G.toLists base) cols
-
 tileSize : Int
 tileSize = 40
 
-divGrid : G.Grid Bool -> G.Grid (Html Msg)
-divGrid = G.indexedMap (\x y bool -> div [onClick (Click y x), style <| cellStyle bool] [ ])
-
-cellDivGrid : G.Grid Bool -> List (Html Msg)
-cellDivGrid grid =
-    divGrid grid
-    |> G.toLists
-    |> List.map (div [style rowStyle])
+divGrid : G.Grid Mark -> G.Grid (Html Msg)
+divGrid = G.indexedMap (\x y mark -> div [onClick (Click y x), style <| cellStyle mark] [])
 
 type alias Style = List (String, String)
 
-rowStyle : Style
-rowStyle =
-    [ ("display", "block")
-    , ("margin", "5px 0")
-    ]
-
-boardStyle : Int -> Style
-boardStyle w =
-    [ ("width", px <| (w+1) * tileSize)]
-
-cellStyle : Bool -> Style
-cellStyle b =
-    [ ("background-color", if b then "black" else "gray")
-    , ("width", px tileSize)
+cellStyle : Mark -> Style
+cellStyle m =
+    [ ("width", px tileSize)
     , ("height", px tileSize)
     , ("display", "block")
     , ("float", "left")
     , ("margin", "0.5px")
-    ]
+    ] ++ case m of
+        White ->
+            [ ("background-color", "lightgray") ]
+        Black ->
+            [ ("background-color", "black") ]
+        Dot ->
+            [ ("background", "linear-gradient(135deg, lightgray, lightgray 40%, gray, lightgray 60%, lightgray)") ]
 
 numStyle : Style
 numStyle =
@@ -85,11 +64,6 @@ numStyle =
     , ("display", "block")
     , ("float", "left")
     , ("margin", "0.5px")
-    ]
-
-numCell : Style
-numCell =
-    [
     ]
 
 px : Int -> String

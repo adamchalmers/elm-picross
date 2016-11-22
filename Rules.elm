@@ -1,7 +1,9 @@
-module Rules exposing (..)
+module Rules exposing (gridHeaders, done, toBool)
 -- Rules of Picross, game logic.
 
 import Grid as G
+import Core exposing (..)
+
 import Maybe as M
 
 flattenBools : List Bool -> List Int
@@ -38,3 +40,13 @@ gridHeaders grid =
         rows = fmt transpose
     in
         (cols, rows)
+
+done : G.Grid Bool -> G.Grid Mark -> Bool
+done puzzle progress =
+        puzzle == G.map toBool progress
+
+toBool : Mark -> Bool
+toBool m = case m of
+    Black -> True
+    White -> False
+    Dot -> False
