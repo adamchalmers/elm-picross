@@ -8,5 +8,7 @@ type alias Model =
     }
 
 type Msg = Noop | Click Int Int
-
 type Mark = White | Black | Dot
+type HintProgress = Todo | Done | Mistake
+
+type alias Hint = (Int, HintProgress)

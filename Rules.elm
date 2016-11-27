@@ -1,4 +1,4 @@
-module Rules exposing (gridHeaders, done, toBool)
+module Rules exposing (markedHints, solved)
 -- Rules of Picross, game logic.
 
 import Grid as G
@@ -28,25 +28,40 @@ countBools accum prev bools =
         (False, (True::bs)) ->
             countBools (1::accum) True bs
 
-gridHeaders : G.Grid Bool -> (List String, List String)
--- Returns column/row headers for a Picross grid.
-gridHeaders grid =
+hints : G.Grid Bool -> (List (List Int), List (List Int))
+hints grid =
     let
         transpose = case G.transpose grid of
             Nothing -> Debug.crash "Couldn't transpose grid"
             Just t -> t
-        fmt g = G.toLists g |> List.map (toString << flattenBools)
+        fmt g = List.map flattenBools <| G.toLists g
         cols = fmt grid
         rows = fmt transpose
     in
         (cols, rows)
 
-done : G.Grid Bool -> G.Grid Mark -> Bool
-done puzzle progress =
-        puzzle == G.map toBool progress
+hintHeaders : G.Grid Bool -> (List String, List String)
+-- Hints for how many blocks are filled in for each row/column in the puzzle.
+hintHeaders grid =
+    let
+        (cols, rows) = hints grid
+        fmt = List.map ((String.join " ") << List.map toString)
+    in
+        (fmt cols, fmt rows)
 
-toBool : Mark -> Bool
-toBool m = case m of
-    Black -> True
-    White -> False
-    Dot -> False
+solved : G.Grid Bool -> G.Grid Mark -> Bool
+-- Has this puzzle been solved (i.e. has the user marked all blocks)?
+solved puzzle progress =
+    puzzle == G.map (\m -> case m of
+        Black -> True
+        White -> False
+        Dot -> False)
+    progress
+
+markedHints : G.Grid Bool -> G.Grid Mark -> (List (List Hint), List (List Hint))
+markedHints puzzle progress =
+    let
+        (cols, rows) = hints puzzle
+        addHintType = List.map (\i -> (i, Todo))
+    in
+        (List.map addHintType cols, List.map addHintType rows)

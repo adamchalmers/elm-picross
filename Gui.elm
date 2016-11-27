@@ -3,6 +3,7 @@ module Gui exposing (view)
 import Html exposing (Html, Attribute, beginnerProgram, p, text, div, input, span, table, tr, td, th)
 import Html.Attributes exposing (style)
 import Html.Events exposing (onClick)
+import String
 
 import Core exposing (..)
 import Grid as G
@@ -15,24 +16,33 @@ view model =
             table [] (firstRow::trs)
         firstRow = tr []
             [ th [] []
-            , th [] <| List.map (\num -> div [style numStyle] [text num]) cols
+            , th [] <| [div [] (fmtDiv colHints)]
             ]
-        (rows, cols) = Rules.gridHeaders model.puzzle
-        trs = -- The trs contain tds
-            List.map2
-                (\divRow nums -> tr [] (tds (nums) divRow))
-                (G.toLists <| divGrid model.progress)
-                rows
-        tds header row = -- The tds contain numbers, then divs.
-            [ td [] [text header]
-            , td [] row
-            ]
+        (rowHints, colHints) = Rules.markedHints model.puzzle model.progress
+        divRows = List.map (div []) (G.toLists <| divGrid model.progress)
+        trs = List.map2 makeTr rowHints divRows
     in
         div []
             [ boardTable
             , div [] [text model.console]
             -- , p [] [text "Cols: ", text <| String.join " " cols]
             ]
+
+makeTr : List Hint -> Html.Html Msg -> Html.Html Msg
+makeTr hints divRow = tr []
+        [ td [] [text (List.map (\(num, kind) -> toString num) hints |> String.join " ")]
+        , td [] [divRow]
+        ]
+
+fmt : List (List Hint) -> List String
+fmt hints = List.map (\h -> List.map (\(num, kind) -> toString num) h |> String.join " ") hints
+
+fmtDiv : List (List Hint) -> List (Html.Html Msg)
+fmtDiv hints =
+    let
+        strings = fmt hints
+    in
+        List.map (\s -> span [style numStyle] [text s]) strings
 
 tileSize : Int
 tileSize = 40

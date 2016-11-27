@@ -20,7 +20,7 @@ easyPic =
     G.fromLists
         [ [False, False, True, True]
         , [False, True, False, False]
-        , [False, False, True, True]
+        , [True, False, True, True]
         , [False, True, True, True]
         ]
 
@@ -39,7 +39,7 @@ update msg model =
                 { model
                 | progress = newProgress
                 , console =
-                    if (Rules.done model.puzzle newProgress)
+                    if (Rules.solved model.puzzle newProgress)
                     then "You win!"
                     else ""
                 }
