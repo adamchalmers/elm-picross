@@ -11,31 +11,29 @@ import Rules
 
 view : Model -> Html Msg
 view model =
+    div []
+        [ gridToTable model
+        , div [] [text model.console]
+        -- , p [] [text "Cols: ", text <| String.join " " cols]
+        ]
+
+gridToTable : Model -> Html Msg
+gridToTable model =
     let
-        boardTable = -- the table contains trs
-            table [] (firstRow::trs)
         firstRow = tr []
             [ th [] []
             , th [] <| [div [] (fmtDiv colHints)]
             ]
         (rowHints, colHints) = Rules.markedHints model.puzzle model.progress
         divRows = List.map (div []) (G.toLists <| divGrid model.progress)
-        trs = List.map2 makeTr rowHints divRows
     in
-        div []
-            [ boardTable
-            , div [] [text model.console]
-            -- , p [] [text "Cols: ", text <| String.join " " cols]
-            ]
+        div [] [table [] (firstRow::(List.map2 makeTr rowHints divRows))]
 
 makeTr : List Hint -> Html.Html Msg -> Html.Html Msg
 makeTr hints divRow = tr []
         [ td [] [text (List.map (\(num, kind) -> toString num) hints |> String.join " ")]
         , td [] [divRow]
         ]
-
-fmt : List (List Hint) -> List String
-fmt hints = List.map (\h -> List.map (\(num, kind) -> toString num) h |> String.join " ") hints
 
 fmtDiv : List (List Hint) -> List (Html.Html Msg)
 fmtDiv hints =

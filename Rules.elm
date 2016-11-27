@@ -40,15 +40,6 @@ hints grid =
     in
         (cols, rows)
 
-hintHeaders : G.Grid Bool -> (List String, List String)
--- Hints for how many blocks are filled in for each row/column in the puzzle.
-hintHeaders grid =
-    let
-        (cols, rows) = hints grid
-        fmt = List.map ((String.join " ") << List.map toString)
-    in
-        (fmt cols, fmt rows)
-
 solved : G.Grid Bool -> G.Grid Mark -> Bool
 -- Has this puzzle been solved (i.e. has the user marked all blocks)?
 solved puzzle progress =
