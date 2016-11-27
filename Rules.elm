@@ -59,6 +59,7 @@ solved puzzle progress =
     progress
 
 markedHints : G.Grid Bool -> G.Grid Mark -> (List (List Hint), List (List Hint))
+-- TODO: implement this.
 markedHints puzzle progress =
     let
         (cols, rows) = hints puzzle

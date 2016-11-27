@@ -40,9 +40,9 @@ fmt hints = List.map (\h -> List.map (\(num, kind) -> toString num) h |> String.
 fmtDiv : List (List Hint) -> List (Html.Html Msg)
 fmtDiv hints =
     let
-        strings = fmt hints
+        spanFor (num, hintType) = span [style <| numStyle hintType] [text <| toString num]
     in
-        List.map (\s -> span [style numStyle] [text s]) strings
+        List.map (\h -> div [] <| List.map spanFor h) hints
 
 tileSize : Int
 tileSize = 40
@@ -67,13 +67,17 @@ cellStyle m =
         Dot ->
             [ ("background", "linear-gradient(135deg, lightgray, lightgray 40%, gray, lightgray 60%, lightgray)") ]
 
-numStyle : Style
-numStyle =
+numStyle : HintProgress -> Style
+numStyle ht =
     [ ("background-color", "white")
     , ("width", px tileSize)
     , ("display", "block")
     , ("float", "left")
     , ("margin", "0.5px")
+    , ("color", case ht of
+        Todo -> "black"
+        Done -> "gray"
+        Mistake -> "orange")
     ]
 
 px : Int -> String
